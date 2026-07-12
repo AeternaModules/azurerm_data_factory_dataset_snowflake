@@ -1,3 +1,7 @@
+output "data_factory_dataset_snowflakes_id" {
+  description = "Map of id values across all data_factory_dataset_snowflakes, keyed the same as var.data_factory_dataset_snowflakes"
+  value       = { for k, v in azurerm_data_factory_dataset_snowflake.data_factory_dataset_snowflakes : k => v.id }
+}
 output "data_factory_dataset_snowflakes_additional_properties" {
   description = "Map of additional_properties values across all data_factory_dataset_snowflakes, keyed the same as var.data_factory_dataset_snowflakes"
   value       = { for k, v in azurerm_data_factory_dataset_snowflake.data_factory_dataset_snowflakes : k => v.additional_properties }
