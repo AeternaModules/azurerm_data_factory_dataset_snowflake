@@ -13,7 +13,7 @@ resource "azurerm_data_factory_dataset_snowflake" "data_factory_dataset_snowflak
   table_name            = each.value.table_name
 
   dynamic "schema_column" {
-    for_each = each.value.schema_column != null ? [each.value.schema_column] : []
+    for_each = each.value.schema_column != null ? each.value.schema_column : []
     content {
       name      = schema_column.value.name
       precision = schema_column.value.precision

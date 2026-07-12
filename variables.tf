@@ -31,85 +31,13 @@ EOT
     parameters            = optional(map(string))
     schema_name           = optional(string)
     table_name            = optional(string)
-    schema_column = optional(object({
+    schema_column = optional(list(object({
       name      = string
       precision = optional(number)
       scale     = optional(number)
       type      = optional(string)
-    }))
+    })))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        length(v.linked_service_name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.table_name == null || (length(v.table_name) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.schema_name == null || (length(v.schema_name) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.description == null || (length(v.description) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.folder == null || (length(v.folder) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.schema_column == null || (length(v.schema_column.name) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.schema_column == null || (v.schema_column.type == null || (contains(["NUMBER", "DECIMAL", "NUMERIC", "INT", "INTEGER", "BIGINT", "SMALLINT", "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE", "DOUBLE PRECISION", "REAL", "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY", "BOOLEAN", "DATE", "DATETIME", "TIME", "TIMESTAMP", "TIMESTAMP_LTZ", "TIMESTAMP_NTZ", "TIMESTAMP_TZ", "VARIANT", "OBJECT", "ARRAY", "GEOGRAPHY"], v.schema_column.type)))
-      )
-    ])
-    error_message = "must be one of: NUMBER, DECIMAL, NUMERIC, INT, INTEGER, BIGINT, SMALLINT, FLOAT, FLOAT4, FLOAT8, DOUBLE, DOUBLE PRECISION, REAL, VARCHAR, CHAR, CHARACTER, STRING, TEXT, BINARY, VARBINARY, BOOLEAN, DATE, DATETIME, TIME, TIMESTAMP, TIMESTAMP_LTZ, TIMESTAMP_NTZ, TIMESTAMP_TZ, VARIANT, OBJECT, ARRAY, GEOGRAPHY"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.schema_column == null || (v.schema_column.precision == null || (v.schema_column.precision >= 0))
-      )
-    ])
-    error_message = "must be at least 0"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.data_factory_dataset_snowflakes : (
-        v.schema_column == null || (v.schema_column.scale == null || (v.schema_column.scale >= 0))
-      )
-    ])
-    error_message = "must be at least 0"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_data_factory_dataset_snowflake's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -120,5 +48,32 @@ EOT
   #   source:    [from factories.ValidateFactoryID] !ok
   # path: data_factory_id
   #   source:    [from factories.ValidateFactoryID] err != nil
+  # path: linked_service_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: table_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: schema_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: description
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: folder
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: schema_column.name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: schema_column.type
+  #   condition: contains(["NUMBER", "DECIMAL", "NUMERIC", "INT", "INTEGER", "BIGINT", "SMALLINT", "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE", "DOUBLE PRECISION", "REAL", "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY", "BOOLEAN", "DATE", "DATETIME", "TIME", "TIMESTAMP", "TIMESTAMP_LTZ", "TIMESTAMP_NTZ", "TIMESTAMP_TZ", "VARIANT", "OBJECT", "ARRAY", "GEOGRAPHY"], value)
+  #   message:   must be one of: NUMBER, DECIMAL, NUMERIC, INT, INTEGER, BIGINT, SMALLINT, FLOAT, FLOAT4, FLOAT8, DOUBLE, DOUBLE PRECISION, REAL, VARCHAR, CHAR, CHARACTER, STRING, TEXT, BINARY, VARBINARY, BOOLEAN, DATE, DATETIME, TIME, TIMESTAMP, TIMESTAMP_LTZ, TIMESTAMP_NTZ, TIMESTAMP_TZ, VARIANT, OBJECT, ARRAY, GEOGRAPHY
+  # path: schema_column.precision
+  #   condition: value >= 0
+  #   message:   must be at least 0
+  # path: schema_column.scale
+  #   condition: value >= 0
+  #   message:   must be at least 0
 }
 
