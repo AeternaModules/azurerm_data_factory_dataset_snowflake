@@ -38,42 +38,78 @@ EOT
       type      = optional(string)
     })))
   }))
-  # --- Unconfirmed validation candidates, derived from azurerm_data_factory_dataset_snowflake's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: name
-  #   source:    [from validate.LinkedServiceDatasetName] regexp.MustCompile(`^[-.+?/<>*%&:\\]+$`).MatchString(value)
-  # path: data_factory_id
-  #   source:    [from factories.ValidateFactoryID] !ok
-  # path: data_factory_id
-  #   source:    [from factories.ValidateFactoryID] err != nil
-  # path: linked_service_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: table_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: schema_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: description
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: folder
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: schema_column.name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: schema_column.type
-  #   condition: contains(["NUMBER", "DECIMAL", "NUMERIC", "INT", "INTEGER", "BIGINT", "SMALLINT", "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE", "DOUBLE PRECISION", "REAL", "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY", "BOOLEAN", "DATE", "DATETIME", "TIME", "TIMESTAMP", "TIMESTAMP_LTZ", "TIMESTAMP_NTZ", "TIMESTAMP_TZ", "VARIANT", "OBJECT", "ARRAY", "GEOGRAPHY"], value)
-  #   message:   must be one of: NUMBER, DECIMAL, NUMERIC, INT, INTEGER, BIGINT, SMALLINT, FLOAT, FLOAT4, FLOAT8, DOUBLE, DOUBLE PRECISION, REAL, VARCHAR, CHAR, CHARACTER, STRING, TEXT, BINARY, VARBINARY, BOOLEAN, DATE, DATETIME, TIME, TIMESTAMP, TIMESTAMP_LTZ, TIMESTAMP_NTZ, TIMESTAMP_TZ, VARIANT, OBJECT, ARRAY, GEOGRAPHY
-  # path: schema_column.precision
-  #   condition: value >= 0
-  #   message:   must be at least 0
-  # path: schema_column.scale
-  #   condition: value >= 0
-  #   message:   must be at least 0
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        length(v.linked_service_name) > 0
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.table_name == null || (length(v.table_name) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.schema_name == null || (length(v.schema_name) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.description == null || (length(v.description) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.folder == null || (length(v.folder) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.schema_column == null || alltrue([for item in v.schema_column : (length(item.name) > 0)])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.schema_column == null || alltrue([for item in v.schema_column : (item.type == null || (contains(["NUMBER", "DECIMAL", "NUMERIC", "INT", "INTEGER", "BIGINT", "SMALLINT", "FLOAT", "FLOAT4", "FLOAT8", "DOUBLE", "DOUBLE PRECISION", "REAL", "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY", "BOOLEAN", "DATE", "DATETIME", "TIME", "TIMESTAMP", "TIMESTAMP_LTZ", "TIMESTAMP_NTZ", "TIMESTAMP_TZ", "VARIANT", "OBJECT", "ARRAY", "GEOGRAPHY"], item.type)))])
+      )
+    ])
+    error_message = "must be one of: NUMBER, DECIMAL, NUMERIC, INT, INTEGER, BIGINT, SMALLINT, FLOAT, FLOAT4, FLOAT8, DOUBLE, DOUBLE PRECISION, REAL, VARCHAR, CHAR, CHARACTER, STRING, TEXT, BINARY, VARBINARY, BOOLEAN, DATE, DATETIME, TIME, TIMESTAMP, TIMESTAMP_LTZ, TIMESTAMP_NTZ, TIMESTAMP_TZ, VARIANT, OBJECT, ARRAY, GEOGRAPHY"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.schema_column == null || alltrue([for item in v.schema_column : (item.precision == null || (item.precision >= 0))])
+      )
+    ])
+    error_message = "must be at least 0"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.data_factory_dataset_snowflakes : (
+        v.schema_column == null || alltrue([for item in v.schema_column : (item.scale == null || (item.scale >= 0))])
+      )
+    ])
+    error_message = "must be at least 0"
+  }
+  # Note: 3 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 
